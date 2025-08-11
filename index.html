@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golf GPS - Tablet</title>
+    <title>Golf GPS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             font-family: 'Inter', sans-serif;
             transition: background-color 0.3s ease;
         }
+        /* Style the wake lock icon a bit thicker */
         .icon {
             stroke: currentColor;
             stroke-width: 2;
@@ -17,299 +18,277 @@
             stroke-linejoin: round;
             fill: none;
         }
-        .distance-card {
-            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+        #wake-lock-icon {
+            stroke-width: 3;
         }
-        .dark .distance-card {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        .hazard-item {
-            backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        /* High contrast for outdoor use */
-        .high-contrast {
-            text-shadow: 0 0 8px rgba(0,0,0,0.8);
+        /* Scorecard icon styles */
+        #scorecard-btn .scorecard-icon path {
+            fill: currentColor;
         }
     </style>
 </head>
-<body class="bg-gradient-to-br from-green-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 min-h-screen overflow-hidden">
-    
-    <!-- Main GPS View -->
-    <div id="main-view" class="h-screen flex flex-col p-6">
-        
-        <!-- Header - Compact -->
-        <div class="flex justify-between items-center mb-6">
-            <button id="scorecard-btn" class="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl hover:scale-105 transition-all">
-                <svg class="w-8 h-8 text-gray-700 dark:text-gray-300" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                    <line x1="16" y1="13" x2="8" y2="13"></line>
-                    <line x1="16" y1="17" x2="8" y2="17"></line>
-                </svg>
-            </button>
-            
-            <div class="text-center flex-1">
-                <h1 id="course-name" class="text-4xl font-black text-gray-900 dark:text-white high-contrast"></h1>
-                <p id="hole-info" class="text-2xl text-gray-600 dark:text-gray-400 font-bold high-contrast"></p>
-            </div>
-            
-            <button id="wake-lock-btn" class="p-4 rounded-2xl bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm shadow-xl hover:scale-105 transition-all">
-                <svg id="wake-lock-icon" class="w-8 h-8 text-gray-700 dark:text-gray-300 icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-                </svg>
-            </button>
-        </div>
+<body class="bg-zinc-50 dark:bg-zinc-900 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white dark:bg-zinc-800 rounded-3xl shadow-2xl p-8 max-w-sm w-full mx-auto md:max-w-4xl md:min-h-[80vh] flex flex-col justify-between transition-colors">
 
-        <!-- Main Content Area - Landscape Layout -->
-        <div class="flex-1 flex gap-8">
+        <!-- Main GPS View - Now a responsive two-column layout on medium screens -->
+        <div id="main-view" class="flex flex-col md:flex-row md:space-x-8 justify-between h-full">
             
-            <!-- Left Side - Distance Display -->
-            <div class="flex-1 flex flex-col justify-center">
-                <div class="grid grid-rows-3 gap-6 h-full max-h-[500px]">
+            <!-- Left Column: Distance & Course Info -->
+            <div class="flex flex-col md:w-1/2">
+                <!-- Controls and Settings -->
+                <div class="flex justify-between items-center mb-6">
+                    <!-- Scorecard Button -->
+                    <button id="scorecard-btn" class="p-2 rounded-full text-zinc-800 dark:text-zinc-200 bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors">
+                        <svg class="scorecard-icon w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 8 9 8 11"></polyline>
+                        </svg>
+                    </button>
                     
-                    <!-- Front Distance -->
-                    <div class="distance-card rounded-3xl p-8 shadow-2xl flex items-center justify-between">
-                        <div class="text-left">
-                            <p class="text-2xl font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider high-contrast">FRONT</p>
-                            <p class="text-lg text-gray-500 dark:text-gray-400 high-contrast">yards</p>
-                        </div>
-                        <p id="distance-front" class="text-9xl font-black text-red-600 dark:text-red-400 high-contrast leading-none">--</p>
+                    <!-- App Title and Course Info -->
+                    <div class="text-center flex-grow">
+                        <h1 id="course-name" class="text-2xl font-extrabold text-zinc-900 dark:text-zinc-100 mb-1 transition-colors"></h1>
+                        <p id="hole-info" class="text-md text-zinc-500 dark:text-zinc-400 font-medium transition-colors"></p>
                     </div>
+                    
+                    <!-- Wake Lock Toggle Button -->
+                    <button id="wake-lock-btn" class="p-2 rounded-full text-zinc-800 dark:text-zinc-200 bg-zinc-200 dark:bg-zinc-700 hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors">
+                        <svg id="wake-lock-icon" class="w-6 h-6 icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </button>
+                </div>
 
-                    <!-- Center Distance - Highlighted -->
-                    <div class="distance-card rounded-3xl p-8 shadow-2xl border-4 border-green-400 dark:border-green-600 flex items-center justify-between bg-gradient-to-r from-green-100 to-green-50 dark:from-green-900 dark:to-green-800">
-                        <div class="text-left">
-                            <p class="text-2xl font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider high-contrast">CENTER</p>
-                            <p class="text-lg text-gray-500 dark:text-gray-400 high-contrast">yards</p>
+                <!-- Distance Display -->
+                <div class="flex-grow flex flex-col justify-center">
+                    <div class="grid grid-cols-3 gap-4 text-center mb-6">
+                        <!-- Front of Green -->
+                        <div class="bg-teal-100 dark:bg-teal-900 rounded-2xl p-4 shadow-inner transition-colors">
+                            <p class="text-sm font-semibold text-zinc-600 dark:text-zinc-300">Front</p>
+                            <p id="distance-front" class="text-4xl font-black text-red-600 dark:text-red-400 mt-2">--</p>
+                            <p class="text-xs text-zinc-400 dark:text-zinc-500">yards</p>
                         </div>
-                        <p id="distance-center" class="text-9xl font-black text-green-600 dark:text-green-400 high-contrast leading-none">--</p>
-                    </div>
-
-                    <!-- Back Distance -->
-                    <div class="distance-card rounded-3xl p-8 shadow-2xl flex items-center justify-between">
-                        <div class="text-left">
-                            <p class="text-2xl font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wider high-contrast">BACK</p>
-                            <p class="text-lg text-gray-500 dark:text-gray-400 high-contrast">yards</p>
+                        <!-- Center of Green -->
+                        <div class="bg-teal-100 dark:bg-teal-900 rounded-2xl p-4 shadow-inner transition-colors">
+                            <p class="text-sm font-semibold text-zinc-600 dark:text-zinc-300">Center</p>
+                            <p id="distance-center" class="text-4xl font-black text-white dark:text-white mt-2">--</p>
+                            <p class="text-xs text-zinc-400 dark:text-zinc-500">yards</p>
                         </div>
-                        <p id="distance-back" class="text-9xl font-black text-blue-600 dark:text-blue-400 high-contrast leading-none">--</p>
+                        <!-- Back of Green -->
+                        <div class="bg-teal-100 dark:bg-teal-900 rounded-2xl p-4 shadow-inner transition-colors">
+                            <p class="text-sm font-semibold text-zinc-600 dark:text-zinc-300">Back</p>
+                            <p id="distance-back" class="text-4xl font-black text-blue-600 dark:text-blue-400 mt-2">--</p>
+                            <p class="text-xs text-zinc-400 dark:text-zinc-500">yards</p>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side - Hazards, Shot Tracking, and Controls -->
-            <div class="w-96 flex flex-col space-y-6">
+            <!-- Right Column: Hazards, Shot Tracker, & Controls -->
+            <div class="flex flex-col md:w-1/2">
+                <!-- Hazard Display - Now with Left and Right columns -->
+                <div class="flex justify-between space-x-2">
+                    <div id="hazards-left" class="flex flex-col space-y-2 w-1/2 items-start">
+                        <!-- Left Hazards will be dynamically added here -->
+                    </div>
+                    <div id="hazards-right" class="flex flex-col space-y-2 w-1/2 items-end">
+                        <!-- Right Hazards will be dynamically added here -->
+                    </div>
+                </div>
                 
-                <!-- Hazards Section -->
-                <div id="hazards-container" class="flex-1">
-                    <h3 class="text-xl font-bold text-gray-700 dark:text-gray-300 mb-4 high-contrast">HAZARDS</h3>
-                    <div id="hazards-list" class="space-y-3">
-                        <!-- Hazards will be dynamically added here -->
-                    </div>
+                <!-- Loading and Error Messages -->
+                <p id="message-area" class="text-center text-sm font-medium h-6 text-zinc-600 dark:text-zinc-400 mt-4"></p>
+
+                <!-- Shot Tracker Display (hidden by default) -->
+                <div id="shot-distance-display" class="hidden text-center mt-4">
+                    <p class="text-md font-semibold text-zinc-600 dark:text-zinc-300">Last Shot Distance</p>
+                    <p id="shot-distance" class="text-3xl font-black text-teal-600 dark:text-teal-400 mt-1">--</p>
+                    <p class="text-xs text-zinc-400 dark:text-zinc-500">yards</p>
                 </div>
 
-                <!-- Shot Distance Display -->
-                <div id="shot-distance-display" class="hidden">
-                    <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl p-6 shadow-xl border-2 border-orange-400">
-                        <div class="text-center">
-                            <p class="text-lg font-bold text-gray-600 dark:text-gray-300 uppercase tracking-wide mb-2 high-contrast">LAST SHOT</p>
-                            <p id="shot-distance" class="text-6xl font-black text-orange-600 dark:text-orange-400 high-contrast">--</p>
-                            <p class="text-lg text-gray-500 dark:text-gray-400 high-contrast">yards</p>
-                        </div>
-                    </div>
-                </div>
+                <!-- Shot Tracker Button -->
+                <button id="shot-tracker-btn" class="w-full mt-4 font-bold py-3 px-4 rounded-full shadow-md transition-colors bg-blue-600 text-white">
+                    Start Shot
+                </button>
 
-                <!-- Message Area -->
-                <div class="text-center min-h-[60px] flex items-center justify-center">
-                    <p id="message-area" class="text-lg font-semibold text-gray-600 dark:text-gray-400 high-contrast"></p>
-                </div>
-
-                <!-- Controls -->
-                <div class="space-y-4">
-                    <!-- Navigation Buttons -->
-                    <div class="grid grid-cols-2 gap-4">
-                        <button id="prev-hole-btn" class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 font-bold py-6 px-6 rounded-2xl shadow-xl hover:scale-105 transition-all text-xl">
-                            ← PREV
-                        </button>
-                        <button id="next-hole-btn" class="bg-blue-600 text-white font-bold py-6 px-6 rounded-2xl shadow-xl hover:bg-blue-700 hover:scale-105 transition-all text-xl">
-                            NEXT →
-                        </button>
-                    </div>
-                    
-                    <!-- Shot Tracker -->
-                    <button id="shot-tracker-btn" class="w-full bg-green-600 text-white font-bold py-6 rounded-2xl shadow-xl hover:bg-green-700 hover:scale-105 transition-all text-xl">
-                        START SHOT
+                <!-- Navigation and Actions -->
+                <div class="flex items-center justify-between gap-4 mt-6">
+                    <button id="prev-hole-btn" class="flex-1 bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold py-3 px-4 rounded-full shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors">
+                        Previous
+                    </button>
+                    <button id="next-hole-btn" class="flex-1 bg-blue-600 text-white font-bold py-3 px-4 rounded-full shadow-lg hover:bg-blue-700 transition-colors transform hover:scale-105">
+                        Next
                     </button>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Score Entry View -->
-    <div id="score-entry-view" class="hidden h-screen flex items-center justify-center p-6">
-        <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg rounded-3xl p-12 shadow-2xl max-w-4xl w-full">
-            <h1 id="score-entry-title" class="text-6xl font-black text-gray-900 dark:text-white text-center mb-12 high-contrast">Score Hole 1</h1>
-            
-            <div class="grid grid-cols-3 gap-8 mb-12">
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="1">1</button>
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="2">2</button>
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="3">3</button>
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="4">4</button>
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="5">5</button>
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="6">6</button>
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="7">7</button>
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="8">8</button>
-                <button class="score-btn bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-900 dark:text-white font-black py-12 rounded-3xl text-7xl shadow-xl hover:scale-105 transition-all" data-score="9">9</button>
+        <!-- Score Entry View (hidden by default) -->
+        <div id="score-entry-view" class="hidden flex flex-col justify-between h-full">
+            <div>
+                <h1 id="score-entry-title" class="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 text-center mb-8">Score Hole 1</h1>
+                <div class="grid grid-cols-3 gap-4 md:grid-cols-5 lg:grid-cols-9">
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="1">1</button>
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="2">2</button>
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="3">3</button>
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="4">4</button>
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="5">5</button>
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="6">6</button>
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="7">7</button>
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="8">8</button>
+                    <button class="score-btn bg-zinc-200 dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-bold py-6 rounded-full text-4xl shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors" data-score="9">9</button>
+                </div>
             </div>
-            
-            <div class="text-center">
-                <p id="score-entry-message" class="text-xl font-semibold text-gray-600 dark:text-gray-400 mb-8 min-h-[28px] high-contrast"></p>
-                <button id="cancel-score-btn" class="bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 font-bold py-6 px-12 rounded-2xl shadow-xl hover:scale-105 transition-all text-xl">
-                    CANCEL
+            <p id="score-entry-message" class="text-center text-sm font-medium h-6 mt-6 text-zinc-600 dark:text-zinc-400"></p>
+            <button id="cancel-score-btn" class="mt-4 w-full bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold py-3 px-4 rounded-full shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors">
+                Cancel
+            </button>
+        </div>
+
+        <!-- Scorecard View (hidden by default) -->
+        <div id="scorecard-view" class="hidden flex flex-col justify-between h-full">
+            <div>
+                <h1 class="text-3xl font-extrabold text-zinc-900 dark:text-zinc-100 text-center mb-6">Scorecard</h1>
+                <div class="bg-zinc-100 dark:bg-zinc-700 rounded-2xl p-4 shadow-inner transition-colors">
+                    <div class="grid grid-cols-3 gap-2 font-bold text-sm text-zinc-600 dark:text-zinc-300 mb-2">
+                        <span>Hole</span>
+                        <span class="text-center">Par</span>
+                        <span class="text-right">Score</span>
+                    </div>
+                    <hr class="border-zinc-300 dark:border-zinc-600 mb-2">
+                    <div id="scores-list" class="space-y-2">
+                        <!-- Score rows will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+            <div class="mt-6">
+                <div class="flex justify-between items-center bg-blue-600 rounded-2xl p-4 shadow-lg text-white">
+                    <span class="text-xl font-bold">Total Score</span>
+                    <span id="total-score" class="text-4xl font-black">0</span>
+                </div>
+                <button id="back-to-course-btn" class="mt-4 w-full bg-zinc-200 dark:bg-zinc-700 text-zinc-700 dark:text-zinc-300 font-bold py-3 px-4 rounded-full shadow-md hover:bg-zinc-300 dark:hover:bg-zinc-600 transition-colors">
+                    Back to Course
+                </button>
+                <button id="start-new-round-btn" class="mt-4 w-full bg-red-600 text-white font-bold py-3 px-4 rounded-full shadow-lg hover:bg-red-700 transition-colors transform hover:scale-105">
+                    Start New Round
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Scorecard View -->
-    <div id="scorecard-view" class="hidden h-screen flex items-center justify-center p-6">
-        <div class="bg-white/95 dark:bg-gray-800/95 backdrop-blur-lg rounded-3xl p-12 shadow-2xl max-w-5xl w-full">
-            <h1 class="text-6xl font-black text-gray-900 dark:text-white text-center mb-8 high-contrast">SCORECARD</h1>
-            
-            <div class="flex gap-8">
-                <!-- Score List -->
-                <div class="flex-1">
-                    <div class="bg-white/80 dark:bg-gray-700/80 backdrop-blur-sm rounded-2xl p-6 shadow-xl mb-6">
-                        <div class="grid grid-cols-3 gap-4 font-bold text-xl text-gray-600 dark:text-gray-300 mb-4 pb-3 border-b-2 border-gray-300 dark:border-gray-600 high-contrast">
-                            <span>HOLE</span>
-                            <span class="text-center">PAR</span>
-                            <span class="text-right">SCORE</span>
-                        </div>
-                        <div id="scores-list" class="space-y-3 max-h-96 overflow-y-auto">
-                            <!-- Score rows will be added here -->
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Total and Controls -->
-                <div class="w-80 space-y-6">
-                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-8 shadow-xl text-white text-center">
-                        <span class="text-2xl font-bold high-contrast">TOTAL SCORE</span>
-                        <div id="total-score" class="text-8xl font-black high-contrast mt-2">0</div>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <button id="back-to-course-btn" class="w-full bg-white/90 dark:bg-gray-700/90 backdrop-blur-sm text-gray-700 dark:text-gray-300 font-bold py-6 rounded-2xl shadow-xl hover:scale-105 transition-all text-xl">
-                            BACK TO COURSE
-                        </button>
-                        <button id="start-new-round-btn" class="w-full bg-red-600 text-white font-bold py-6 rounded-2xl shadow-xl hover:bg-red-700 hover:scale-105 transition-all text-xl">
-                            START NEW ROUND
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script>
+        // Use a self-invoking function to keep variables out of the global scope
         (function() {
-            // Course data for Hadley Creek
+            // ====================================================================
+            // Step 1: Replace this mock course data with your own course details.
+            //
+            // The `tee` coordinates are now used to trigger the auto-advance feature.
+            //
+            // Format:
+            // hole: the hole number
+            // par: the par for the hole (optional, but good for context)
+            // tee: [latitude, longitude] of the tee box for this hole
+            // front: [latitude, longitude] of the front of the green
+            // center: [latitude, longitude] of the center of the green
+            // back: [latitude, longitude] of the back of the green
+            // hazards: an array of objects, each with a name and location
+            // ====================================================================
             const courseData = {
                 name: "HadleyCreek",
                 holes: [
-                    { 
-                        hole: 1, 
-                        par: 3, 
-                        tee: [44.075384, -92.431759], 
-                        front: [44.074584, -92.432029], 
-                        center: [44.074452, -92.432007], 
+                    {
+                        hole: 1,
+                        par: 3,
+                        tee: [44.075384, -92.431759],
+                        front: [44.074584, -92.432029],
+                        center: [44.074452, -92.432007],
                         back: [44.074334, -92.431968],
                         hazards: []
                     },
-                    { 
-                        hole: 2, 
-                        par: 4, 
-                        tee: [44.073303, -92.431259], 
-                        front: [44.074169, -92.434047], 
-                        center: [44.074227, -92.434211], 
+                    {
+                        hole: 2,
+                        par: 4,
+                        tee: [44.073303, -92.431259],
+                        front: [44.074169, -92.434047],
+                        center: [44.074227, -92.434211],
                         back: [44.074301, -92.434349],
                         hazards: [
                             { name: "Right Bunker", location: [44.073809, -92.432729] },
                             { name: "Left Bunker", location: [44.073771, -92.433538] }
                         ]
                     },
-                    { 
-                        hole: 3, 
-                        par: 3, 
-                        tee: [44.073554, -92.434544], 
-                        front: [44.072758, -92.433836], 
-                        center: [44.072678, -92.433714], 
-                        back: [44.072582, -92.433597], 
+                    {
+                        hole: 3,
+                        par: 3,
+                        tee: [44.073554, -92.434544],
+                        front: [44.072758, -92.433836],
+                        center: [44.072678, -92.433714],
+                        back: [44.072582, -92.433597],
                         hazards: [
                             { name: "Left Bunker", location: [44.07296298584522, -92.43384416400436] }
                         ]
                     },
-                    { 
-                        hole: 4, 
-                        par: 3, 
-                        tee: [44.072748, -92.434836], 
-                        front: [44.073577, -92.435656], 
-                        center: [44.073693, -92.435775], 
+                    {
+                        hole: 4,
+                        par: 3,
+                        tee: [44.072748, -92.434836],
+                        front: [44.073577, -92.435656],
+                        center: [44.073693, -92.435775],
                         back: [44.073808, -92.435914],
                         hazards: []
                     },
-                    { 
-                        hole: 5, 
-                        par: 4, 
-                        tee: [44.074034, -92.439247], 
-                        front: [44.074087, -92.442439], 
-                        center: [44.074133, -92.442610], 
-                        back: [44.074181, -92.442764], 
+                    {
+                        hole: 5,
+                        par: 4,
+                        tee: [44.074034, -92.439247],
+                        front: [44.074087, -92.442439],
+                        center: [44.074133, -92.442610],
+                        back: [44.074181, -92.442764],
                         hazards: []
                     },
-                    { 
-                        hole: 6, 
-                        par: 3, 
-                        tee: [44.073704, -92.443746], 
-                        front: [44.073768, -92.444650], 
-                        center: [44.073819, -92.444810], 
-                        back: [44.073841, -92.444974], 
+                    {
+                        hole: 6,
+                        par: 3,
+                        tee: [44.073704, -92.443746],
+                        front: [44.073768, -92.444650],
+                        center: [44.073819, -92.444810],
+                        back: [44.073841, -92.444974],
                         hazards: [
                             { name: "Water on Right", location: [44.07385845583365, -92.44452525640412] }
                         ]
                     },
-                    { 
-                        hole: 7, 
-                        par: 4, 
-                        tee: [44.075151, -92.445116], 
-                        front: [44.074793, -92.441756], 
-                        center: [44.074769, -92.441583], 
-                        back: [44.074780, -92.441421], 
+                    {
+                        hole: 7,
+                        par: 4,
+                        tee: [44.075151, -92.445116],
+                        front: [44.074793, -92.441756],
+                        center: [44.074769, -92.441583],
+                        back: [44.074780, -92.441421],
                         hazards: [
-                            { name: "Left Bunker", location: [44.074621, -92.442656] }, 
-                            { name: "Right Water", location: [44.074800, -92.441900] } 
+                            { name: "Left Bunker", location: [44.074621, -92.442656] },
+                            { name: "Right Water", location: [44.074800, -92.441900] }
                         ]
                     },
-                    { 
-                        hole: 8, 
-                        par: 3, 
-                        tee: [44.074850, -92.439902], 
-                        front: [44.074910, -92.438149], 
-                        center: [44.074950, -92.437983], 
-                        back: [44.074989, -92.437890], 
+                    {
+                        hole: 8,
+                        par: 3,
+                        tee: [44.074850, -92.439902],
+                        front: [44.074910, -92.438149],
+                        center: [44.074950, -92.437983],
+                        back: [44.074989, -92.437890],
                         hazards: []
                     },
-                    { 
-                        hole: 9, 
-                        par: 4, 
-                        tee: [44.074869, -92.436735], 
-                        front: [44.075048, -92.433139], 
-                        center: [44.075108, -92.433005], 
-                        back: [44.075154, -92.432855], 
+                    {
+                        hole: 9,
+                        par: 4,
+                        tee: [44.074869, -92.436735],
+                        front: [44.075048, -92.433139],
+                        center: [44.075108, -92.433005],
+                        back: [44.075154, -92.432855],
                         hazards: [
                             { name: "Left Bunker", location: [44.07517764620998, -92.43392076595802] }
                         ]
@@ -317,32 +296,45 @@
                 ]
             };
             
+            // This is the new coordinate for the clubhouse, used for the final score trigger
             const clubhouseCoordinates = [44.07573313979243, -92.43190539177425];
             
             let currentHoleIndex = 0;
             const scores = new Array(courseData.holes.length).fill(null);
             
-            const proximityThresholdHighAccuracy = 50;
-            const proximityThresholdAdvance = 15;
-            const finalProximityThreshold = 50;
+            // Proximity thresholds for auto-advancing and switching GPS modes
+            const proximityThresholdHighAccuracy = 50; // In yards, for switching to high-accuracy GPS
+            const proximityThresholdAdvance = 15; // In yards, for auto-advancing to the next hole
+            const finalProximityThreshold = 50; // In yards, for the final hole
             
-            let watcherId = null;
-            let gpsState = 'low-power';
+            let watcherId = null; // To store the watchPosition ID
+            let gpsState = 'low-power'; // 'low-power' or 'high-accuracy'
+            
+            // ====================================================================
+            // Shot Tracker specific variable
+            // ====================================================================
             let shotStartLocation = null;
 
-            // Hazard icons
-            const bunkerIcon = `<svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" fill="currentColor" opacity="0.2"/>
+            // ====================================================================
+            // Helper functions to handle the logic
+            // ====================================================================
+
+            // SVG icon for a bunker
+            const bunkerIcon = `<svg class="w-6 h-6 text-amber-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
                 <path d="M12 10V6c-2.21 0-4 1.79-4 4h4z"/>
             </svg>`;
 
-            const waterIcon = `<svg class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2.1c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM21 9h-6l-.35-3.5c-.15-1.49-1.4-2.5-2.9-2.5s-2.75 1.01-2.9 2.5L8.5 9H3c-.55 0-1 .45-1 1s.45 1 1 1h1.25l1.75 8.8c.15.75.8 1.2 1.55 1.2h9.9c.75 0 1.4-.45 1.55-1.2L20.75 11H21c.55 0 1-.45 1-1s-.45-1-1-1z"/>
+            // SVG icon for water
+            const waterIcon = `<svg class="w-6 h-6 text-cyan-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                <path d="M12 12c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                <path d="M12 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
             </svg>`;
 
+            // Haversine formula to calculate distance between two lat/lon points
             function haversine(lat1, lon1, lat2, lon2) {
-                const R = 6371;
+                const R = 6371; // Earth's radius in km
                 const dLat = (lat2 - lat1) * Math.PI / 180;
                 const dLon = (lon2 - lon1) * Math.PI / 180;
                 const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -350,15 +342,23 @@
                           Math.sin(dLon / 2) * Math.sin(dLon / 2);
                 const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
                 const distance_km = R * c;
-                return distance_km * 1093.61;
+                return distance_km * 1093.61; // Convert km to yards
             }
 
+            // Function to update the UI with current hole and course info
             function updateUI() {
                 const hole = courseData.holes[currentHoleIndex];
                 document.getElementById('course-name').textContent = courseData.name;
                 document.getElementById('hole-info').textContent = `Hole ${hole.hole} | Par ${hole.par}`;
+                
+                const nextBtn = document.getElementById('next-hole-btn');
+                // The "Next" button no longer changes text, as the scorecard has its own button
+                nextBtn.textContent = 'Next';
+                nextBtn.classList.add('bg-blue-600');
+                nextBtn.classList.remove('bg-green-600', 'text-white');
             }
 
+            // Function to calculate and display distances to the current hole
             function displayDistances(position) {
                 const userLat = position.coords.latitude;
                 const userLon = position.coords.longitude;
@@ -367,9 +367,12 @@
                 const frontEl = document.getElementById('distance-front');
                 const centerEl = document.getElementById('distance-center');
                 const backEl = document.getElementById('distance-back');
-                const hazardsListEl = document.getElementById('hazards-list');
                 
-                hazardsListEl.innerHTML = '';
+                // Get the new left and right hazard containers
+                const hazardsLeftEl = document.getElementById('hazards-left');
+                const hazardsRightEl = document.getElementById('hazards-right');
+                hazardsLeftEl.innerHTML = ''; // Clear previous hazard list
+                hazardsRightEl.innerHTML = ''; // Clear previous hazard list
 
                 const distFront = haversine(userLat, userLon, currentHole.front[0], currentHole.front[1]);
                 const distCenter = haversine(userLat, userLon, currentHole.center[0], currentHole.center[1]);
@@ -379,132 +382,169 @@
                 centerEl.textContent = Math.round(distCenter);
                 backEl.textContent = Math.round(distBack);
                 
-                // Show hazards only if they exist for this hole
+                // Dynamically add new hazard list to the correct side
                 if (currentHole.hazards && currentHole.hazards.length > 0) {
                     currentHole.hazards.forEach(hazard => {
                         const hazardDiv = document.createElement('div');
                         let bgClass = '';
                         let textClass = '';
-                        let iconHtml = '';
+                        let iconHtml;
+                        let hazardName = '';
+                        let parentElement; // New variable to store the parent container
 
                         const hazardNameLower = hazard.name.toLowerCase();
                         if (hazardNameLower.includes("bunker")) {
-                            bgClass = 'bg-amber-100/90 dark:bg-amber-900/90';
+                            bgClass = 'bg-amber-100 dark:bg-amber-900';
                             textClass = 'text-amber-800 dark:text-amber-200';
                             iconHtml = bunkerIcon;
+                            hazardName = hazard.name;
                         } else if (hazardNameLower.includes("water")) {
-                            bgClass = 'bg-blue-100/90 dark:bg-blue-900/90';
-                            textClass = 'text-blue-800 dark:text-blue-200';
+                            bgClass = 'bg-cyan-100 dark:bg-cyan-900';
+                            textClass = 'text-cyan-800 dark:text-cyan-200';
                             iconHtml = waterIcon;
+                            hazardName = hazard.name;
                         } else {
-                            bgClass = 'bg-gray-100/90 dark:bg-gray-800/90';
-                            textClass = 'text-gray-800 dark:text-gray-200';
+                            bgClass = 'bg-zinc-200 dark:bg-zinc-800';
+                            textClass = 'text-zinc-800 dark:text-zinc-200';
+                            iconHtml = '';
+                            hazardName = hazard.name;
                         }
 
-                        hazardDiv.className = `hazard-item flex justify-between items-center py-4 px-6 rounded-2xl shadow-xl backdrop-blur-sm ${bgClass} ${textClass}`;
+                        // Determine which container to append to and align the text
+                        if (hazardNameLower.includes("left")) {
+                            parentElement = hazardsLeftEl;
+                            hazardDiv.className = `flex justify-start items-center py-2 px-3 rounded-xl shadow-sm ${bgClass} ${textClass}`;
+                        } else if (hazardNameLower.includes("right")) {
+                            parentElement = hazardsRightEl;
+                            hazardDiv.className = `flex justify-end items-center py-2 px-3 rounded-xl shadow-sm ${bgClass} ${textClass}`;
+                        } else {
+                            // If no side is specified, default to the left
+                            parentElement = hazardsLeftEl;
+                            hazardDiv.className = `flex justify-start items-center py-2 px-3 rounded-xl shadow-sm ${bgClass} ${textClass}`;
+                        }
 
-                        if (hazard.location) {
+                        if (hazard.front && hazard.back) {
+                            const distToFront = haversine(userLat, userLon, hazard.front[0], hazard.front[1]);
+                            const distToBack = haversine(userLat, userLon, hazard.back[0], hazard.back[1]);
+                            hazardDiv.innerHTML = `<div class="flex items-center space-x-2">${iconHtml}<span class="text-sm font-semibold">${hazardName}</span></div> <span class="text-lg font-bold">${Math.round(distToFront)} / ${Math.round(distToBack)}<span class="text-xs font-normal"> yds</span></span>`;
+                        } else if (hazard.location) {
                             const distToHazard = haversine(userLat, userLon, hazard.location[0], hazard.location[1]);
-                            hazardDiv.innerHTML = `
-                                <div class="flex items-center space-x-4">
-                                    ${iconHtml}
-                                    <span class="font-bold text-xl high-contrast">${hazard.name}</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-4xl font-black high-contrast">${Math.round(distToHazard)}</span>
-                                    <span class="text-lg opacity-75 ml-2 high-contrast">yds</span>
-                                </div>
-                            `;
+                            
+                            // Re-orient the content based on the side for better readability
+                            if (hazardNameLower.includes("right")) {
+                                hazardDiv.innerHTML = `<span class="text-lg font-bold">${Math.round(distToHazard)}<span class="text-xs font-normal"> yds</span></span> <div class="flex items-center space-x-2">${iconHtml}<span class="text-sm font-semibold">${hazardName}</span></div>`;
+                            } else {
+                                hazardDiv.innerHTML = `<div class="flex items-center space-x-2">${iconHtml}<span class="text-sm font-semibold">${hazardName}</span></div> <span class="text-lg font-bold">${Math.round(distToHazard)}<span class="text-xs font-normal"> yds</span></span>`;
+                            }
                         }
                         
-                        hazardsListEl.appendChild(hazardDiv);
+                        // Append the new hazard box to the correct container
+                        if (parentElement) {
+                            parentElement.appendChild(hazardDiv);
+                        }
                     });
-                } else {
-                    // Show "No Hazards" message when there are none
-                    const noHazardsDiv = document.createElement('div');
-                    noHazardsDiv.className = 'text-center py-8 text-xl text-gray-500 dark:text-gray-400 font-semibold high-contrast';
-                    noHazardsDiv.textContent = 'No hazards on this hole';
-                    hazardsListEl.appendChild(noHazardsDiv);
                 }
             }
             
+            // Function to start the high-accuracy GPS watcher
             function startHighAccuracyWatcher() {
                 if (watcherId !== null) {
                     navigator.geolocation.clearWatch(watcherId);
                 }
                 watcherId = navigator.geolocation.watchPosition(
-                    checkAndAdvance,
-                    (error) => {
-                        document.getElementById('message-area').textContent = 'GPS Error: ' + error.message;
+                    (position) => {
+                        checkAndAdvance(position);
                     },
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+                    (error) => {
+                        document.getElementById('message-area').textContent = 'Error: ' + error.message;
+                        console.error("Geolocation error:", error);
+                    },
+                    {
+                        enableHighAccuracy: true,
+                        timeout: 5000,
+                        maximumAge: 0
+                    }
                 );
                 gpsState = 'high-accuracy';
-                document.getElementById('message-area').textContent = 'High-accuracy GPS active';
+                document.getElementById('message-area').textContent = 'High-accuracy GPS active.';
+                console.log('Switched to high-accuracy GPS.');
             }
 
+            // Function to start the low-power GPS watcher
             function startLowPowerWatcher() {
                 if (watcherId !== null) {
                     navigator.geolocation.clearWatch(watcherId);
                 }
                 watcherId = navigator.geolocation.watchPosition(
-                    checkAndAdvance,
-                    (error) => {
-                        document.getElementById('message-area').textContent = 'GPS Error: ' + error.message;
+                    (position) => {
+                        checkAndAdvance(position);
                     },
-                    { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 }
+                    (error) => {
+                        document.getElementById('message-area').textContent = 'Error: ' + error.message;
+                        console.error("Geolocation error:", error);
+                    },
+                    {
+                        enableHighAccuracy: false,
+                        timeout: 10000,
+                        maximumAge: 60000 // Only get a new position once a minute
+                    }
                 );
                 gpsState = 'low-power';
-                document.getElementById('message-area').textContent = 'GPS active';
+                document.getElementById('message-area').textContent = 'Low-power GPS active.';
+                console.log('Switched to low-power GPS.');
             }
 
+            // Function to check location and switch GPS mode
             function checkAndAdvance(position) {
                 const userLat = position.coords.latitude;
                 const userLon = position.coords.longitude;
                 const currentHole = courseData.holes[currentHoleIndex];
                 
+                // Check distance to the center of the current green
                 const distToGreen = haversine(userLat, userLon, currentHole.center[0], currentHole.center[1]);
                 
-                if (currentHoleIndex < courseData.holes.length - 1) {
-                    const nextHole = courseData.holes[currentHoleIndex + 1];
-                    const distToNextTee = haversine(userLat, userLon, nextHole.tee[0], nextHole.tee[1]);
-                    
-            function checkAndAdvance(position) {
-                const userLat = position.coords.latitude;
-                const userLon = position.coords.longitude;
-                const currentHole = courseData.holes[currentHoleIndex];
-                
-                const distToGreen = haversine(userLat, userLon, currentHole.center[0], currentHole.center[1]);
-                
+                // Check distance to the next tee box to auto-advance
                 if (currentHoleIndex < courseData.holes.length - 1) {
                     const nextHole = courseData.holes[currentHoleIndex + 1];
                     const distToNextTee = haversine(userLat, userLon, nextHole.tee[0], nextHole.tee[1]);
                     
                     if (distToNextTee <= proximityThresholdAdvance && scores[currentHoleIndex] === null) {
+                        // Auto-advance to score entry
                         showScoreEntry(currentHole.hole);
-                        document.getElementById('message-area').textContent = `At next tee - enter score for hole ${currentHole.hole}`;
+                        document.getElementById('message-area').textContent = `Arrived at the next tee box. Please enter your score for the last hole.`;
+                        // Switch to low-power mode once score entry is triggered, as we're not actively playing this hole anymore.
                         startLowPowerWatcher();
-                        return;
+                        return; // Exit the function to prevent further updates
                     }
                 } else {
+                    // Special logic for the final hole
                     const distToClubhouse = haversine(userLat, userLon, clubhouseCoordinates[0], clubhouseCoordinates[1]);
                     if (distToClubhouse <= finalProximityThreshold && scores[currentHoleIndex] === null) {
                         showScoreEntry(currentHole.hole);
-                        document.getElementById('message-area').textContent = `Round complete - enter final score`;
+                        document.getElementById('message-area').textContent = `You're near the clubhouse! Please enter your score for the final hole.`;
+                        // Switch to low-power mode
                         startLowPowerWatcher();
                         return;
                     }
                 }
 
-                if (distToGreen <= proximityThresholdHighAccuracy && gpsState === 'low-power') {
-                    startHighAccuracyWatcher();
-                } else if (distToGreen > proximityThresholdHighAccuracy && gpsState === 'high-accuracy') {
-                    startLowPowerWatcher();
+                // If the user is close to the green, switch to high-accuracy mode
+                if (distToGreen <= proximityThresholdHighAccuracy) {
+                    if (gpsState === 'low-power') {
+                        startHighAccuracyWatcher();
+                    }
+                    displayDistances(position);
+                } else {
+                    // If the user is far from the green and in high-accuracy mode, switch back to low-power
+                    if (gpsState === 'high-accuracy') {
+                        startLowPowerWatcher();
+                    }
+                    displayDistances(position);
                 }
-                
-                displayDistances(position);
             }
 
+
+            // Function to show the score entry view for a specific hole
             function showScoreEntry(holeNumber) {
                 document.getElementById('main-view').classList.add('hidden');
                 document.getElementById('scorecard-view').classList.add('hidden');
@@ -512,26 +552,35 @@
                 document.getElementById('score-entry-title').textContent = `Score Hole ${holeNumber}`;
             }
 
+            // Function to show the main GPS view and hide all other views
             function showMainView() {
                 document.getElementById('main-view').classList.remove('hidden');
                 document.getElementById('scorecard-view').classList.add('hidden');
                 document.getElementById('score-entry-view').classList.add('hidden');
             }
 
+            // Function to save the score and advance to the next hole
             function saveScoreAndAdvance(score) {
                 scores[currentHoleIndex] = parseInt(score);
-                document.getElementById('score-entry-message').textContent = `Score ${score} saved`;
+                document.getElementById('score-entry-message').textContent = `Score of ${score} saved for Hole ${courseData.holes[currentHoleIndex].hole}.`;
                 
+                // Only increment if we're not on the last hole
                 if (currentHoleIndex < courseData.holes.length - 1) {
                     currentHoleIndex++;
                     updateUI();
-                    showMainView();
-                    navigator.geolocation.getCurrentPosition(displayDistances);
                 } else {
+                    // On the last hole, we show the scorecard
                     showScorecard();
                 }
+
+                document.getElementById('score-entry-view').classList.add('hidden');
+                document.getElementById('main-view').classList.remove('hidden');
+                
+                // Get fresh distances for the next hole
+                navigator.geolocation.getCurrentPosition(displayDistances);
             }
             
+            // Function to show the scorecard view and hide the main GPS view
             function showScorecard() {
                 document.getElementById('main-view').classList.add('hidden');
                 document.getElementById('score-entry-view').classList.add('hidden');
@@ -549,22 +598,12 @@
                     }
 
                     const scoreRow = document.createElement('div');
-                    scoreRow.className = `score-row grid grid-cols-3 gap-4 text-lg font-bold p-4 rounded-xl hover:bg-white/60 dark:hover:bg-gray-700/60 cursor-pointer transition-all backdrop-blur-sm`;
-                    scoreRow.dataset.holeIndex = i;
-                    
-                    // Color coding for scores relative to par
-                    let scoreColor = 'text-gray-800 dark:text-gray-200';
-                    if (score !== '-') {
-                        const scoreDiff = score - hole.par;
-                        if (scoreDiff < 0) scoreColor = 'text-green-600 dark:text-green-400'; // Under par
-                        else if (scoreDiff > 0) scoreColor = 'text-red-600 dark:text-red-400'; // Over par
-                        else scoreColor = 'text-blue-600 dark:text-blue-400'; // Par
-                    }
-                    
+                    scoreRow.className = `score-row grid grid-cols-3 gap-2 text-sm text-zinc-800 dark:text-zinc-200 font-medium transition-colors p-2 rounded-xl hover:bg-zinc-200 dark:hover:bg-zinc-700 cursor-pointer`;
+                    scoreRow.dataset.holeIndex = i; // Store the index for easy lookup
                     scoreRow.innerHTML = `
-                        <span class="text-gray-700 dark:text-gray-300 high-contrast">Hole ${hole.hole}</span>
-                        <span class="text-center text-gray-600 dark:text-gray-400 high-contrast">${hole.par}</span>
-                        <span class="text-right font-black ${scoreColor} high-contrast">${score}</span>
+                        <span>Hole ${hole.hole}</span>
+                        <span class="text-center">${hole.par}</span>
+                        <span class="text-right">${score}</span>
                     `;
                     scoresListEl.appendChild(scoreRow);
                 }
@@ -572,30 +611,27 @@
                 document.getElementById('total-score').textContent = totalScore;
             }
 
+            // Function to reset the game and start a new round
             function startNewRound() {
                 currentHoleIndex = 0;
                 scores.fill(null);
-                showMainView();
+                document.getElementById('main-view').classList.remove('hidden');
+                document.getElementById('scorecard-view').classList.add('hidden');
                 updateUI();
+                // Get fresh distances for the new round
                 navigator.geolocation.getCurrentPosition(displayDistances);
             }
 
-            function updateShotTrackerButton(state) {
-                const shotTrackerBtn = document.getElementById('shot-tracker-btn');
-                shotTrackerBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-red-600', 'hover:bg-red-700', 'bg-green-600', 'hover:bg-green-700');
-                
-                if (state === 'tracking') {
-                    shotTrackerBtn.textContent = 'END SHOT';
-                    shotTrackerBtn.classList.add('bg-red-600', 'hover:bg-red-700');
-                } else {
-                    shotTrackerBtn.textContent = 'START SHOT';
-                    shotTrackerBtn.classList.add('bg-green-600', 'hover:bg-green-700');
-                }
-            }
+            // ====================================================================
+            // Event listeners for user interaction
+            // ====================================================================
+            
+            // Event listener for the new scorecard button
+            document.getElementById('scorecard-btn').addEventListener('click', () => {
+                showScorecard();
+            });
 
-            // Event Listeners
-            document.getElementById('scorecard-btn').addEventListener('click', showScorecard);
-
+            // The "Next" button now triggers the score entry screen
             document.getElementById('next-hole-btn').addEventListener('click', () => {
                 if (currentHoleIndex < courseData.holes.length - 1 && scores[currentHoleIndex] !== null) {
                     currentHoleIndex++;
@@ -604,6 +640,7 @@
                 } else if (scores[currentHoleIndex] === null) {
                     showScoreEntry(courseData.holes[currentHoleIndex].hole);
                 } else {
+                    // If all holes are scored, the next button can view the scorecard.
                     showScorecard();
                 }
             });
@@ -612,10 +649,12 @@
                 if (currentHoleIndex > 0) {
                     currentHoleIndex--;
                     updateUI();
+                    // Also trigger a location update to get fresh distances immediately
                     navigator.geolocation.getCurrentPosition(displayDistances);
                 }
             });
 
+            // Score buttons on the new score entry view
             document.querySelectorAll('.score-btn').forEach(button => {
                 button.addEventListener('click', (event) => {
                     const score = event.target.getAttribute('data-score');
@@ -623,12 +662,19 @@
                 });
             });
 
+            // The new "Cancel" button on the score entry screen
             document.getElementById('cancel-score-btn').addEventListener('click', showMainView);
+
+            // The new "Back to Course" button on the scorecard view
             document.getElementById('back-to-course-btn').addEventListener('click', showMainView);
+
+            // "Start New Round" button on the scorecard
             document.getElementById('start-new-round-btn').addEventListener('click', startNewRound);
             
+            // Event listener for clicking on a score row in the scorecard
             document.getElementById('scores-list').addEventListener('click', (event) => {
                 let target = event.target;
+                // Traverse up to find the score-row element
                 while (target && !target.classList.contains('score-row')) {
                     target = target.parentElement;
                 }
@@ -636,30 +682,48 @@
                 if (target) {
                     const holeIndex = parseInt(target.dataset.holeIndex);
                     if (!isNaN(holeIndex)) {
-                        currentHoleIndex = holeIndex;
+                        currentHoleIndex = holeIndex; // Set the current hole to the one we want to edit
                         showScoreEntry(courseData.holes[holeIndex].hole);
                     }
                 }
             });
 
-            // Shot Tracker
+            // ====================================================================
+            // Shot Tracker Event Listener - CORRECTED LOGIC
+            // ====================================================================
             const shotTrackerBtn = document.getElementById('shot-tracker-btn');
             const shotDistanceDisplay = document.getElementById('shot-distance-display');
             const shotDistanceEl = document.getElementById('shot-distance');
             
+            function updateShotTrackerButton(state) {
+                // Remove previous state classes
+                shotTrackerBtn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'bg-red-600', 'hover:bg-red-700');
+                
+                if (state === 'tracking') {
+                    shotTrackerBtn.textContent = 'End Shot';
+                    shotTrackerBtn.classList.add('bg-red-600', 'hover:bg-red-700', 'text-white');
+                } else {
+                    shotTrackerBtn.textContent = 'Start Shot';
+                    shotTrackerBtn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'text-white');
+                }
+            }
+            
+            // Initial button state
             updateShotTrackerButton('idle');
             
             shotTrackerBtn.addEventListener('click', () => {
+                // If a shot is not in progress, start it
                 if (!shotStartLocation) {
                     navigator.geolocation.getCurrentPosition((position) => {
                         shotStartLocation = [position.coords.latitude, position.coords.longitude];
                         updateShotTrackerButton('tracking');
-                        document.getElementById('message-area').textContent = 'Shot tracking - tap again at your ball';
-                        shotDistanceDisplay.classList.add('hidden');
+                        document.getElementById('message-area').textContent = 'Shot started. Hit the button again at your ball.';
+                        shotDistanceDisplay.classList.add('hidden'); // Hide any previous result
                     }, (error) => {
-                        document.getElementById('message-area').textContent = 'Shot start error: ' + error.message;
+                        document.getElementById('message-area').textContent = 'Error starting shot: ' + error.message;
                     });
                 } else {
+                    // If a shot is in progress, end it and calculate the distance
                     navigator.geolocation.getCurrentPosition((position) => {
                         const endLat = position.coords.latitude;
                         const endLon = position.coords.longitude;
@@ -669,16 +733,20 @@
                         shotDistanceEl.textContent = Math.round(distance);
                         shotDistanceDisplay.classList.remove('hidden');
 
+                        // Reset the state
                         shotStartLocation = null;
                         updateShotTrackerButton('idle');
-                        document.getElementById('message-area').textContent = `Shot: ${Math.round(distance)} yards`;
+                        document.getElementById('message-area').textContent = `Shot distance: ${Math.round(distance)} yards.`;
                     }, (error) => {
-                        document.getElementById('message-area').textContent = 'Shot end error: ' + error.message;
+                        document.getElementById('message-area').textContent = 'Error ending shot: ' + error.message;
                     });
                 }
             });
 
-            // Wake Lock
+            // ====================================================================
+            // Wake Lock Functionality
+            // Prevents the screen from dimming/sleeping.
+            // ====================================================================
             const wakeLockBtn = document.getElementById('wake-lock-btn');
             let wakeLockSentinel = null;
 
@@ -686,21 +754,28 @@
                 if ('wakeLock' in navigator) {
                     try {
                         wakeLockSentinel = await navigator.wakeLock.request('screen');
-                        wakeLockBtn.style.backgroundColor = '#10B981';
+                        wakeLockBtn.style.backgroundColor = '#10B981'; // Tailwind's green-500
                         wakeLockBtn.style.color = '#FFFFFF';
+                        wakeLockBtn.style.borderColor = '#10B981';
+                        console.log('Wake Lock is active!');
                     } catch (err) {
-                        console.error(`Wake lock error: ${err.name}, ${err.message}`);
+                        console.error(`${err.name}, ${err.message}`);
                     }
+                } else {
+                    console.error("Wake Lock API not supported.");
                 }
             }
 
             function releaseWakeLock() {
                 if (wakeLockSentinel) {
-                    wakeLockSentinel.release().then(() => {
-                        wakeLockSentinel = null;
-                        wakeLockBtn.style.backgroundColor = '';
-                        wakeLockBtn.style.color = '';
-                    });
+                    wakeLockSentinel.release()
+                        .then(() => {
+                            wakeLockSentinel = null;
+                            wakeLockBtn.style.backgroundColor = '';
+                            wakeLockBtn.style.color = '';
+                            wakeLockBtn.style.borderColor = '';
+                            console.log('Wake Lock released.');
+                        });
                 }
             }
 
@@ -712,14 +787,17 @@
                 }
             });
 
+            // Re-acquire the wake lock if the user navigates back to the app
             document.addEventListener('visibilitychange', () => {
                 if (wakeLockSentinel !== null && document.visibilityState === 'visible') {
                     requestWakeLock();
                 }
             });
 
-            // Initialize
+            // Initial setup and start watching position
             updateUI();
+            
+            // Start with low-power GPS
             startLowPowerWatcher();
         })();
     </script>
